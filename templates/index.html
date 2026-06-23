@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Password Strength Analyzer</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="shield">🛡️</span>
+        <div>
+          <h1>Password Strength Analyzer</h1>
+          <p class="subtitle">Real-time strength, attack resistance estimates, and improvement guidance.</p>
+        </div>
+      </div>
+      <div class="theme-badge">
+        <span class="dot"></span>
+        <span>Cybersecurity • Dark Blue</span>
+      </div>
+    </header>
+
+    <main class="grid">
+      <!-- Left: Analyzer -->
+      <section class="card">
+        <h2 class="card-title">Analyze a Password</h2>
+
+        <div class="field">
+          <label for="passwordInput">Password</label>
+          <div class="input-wrap">
+            <input id="passwordInput" type="password" autocomplete="new-password" placeholder="Enter password..." />
+            <button id="toggleBtn" type="button" class="btn secondary">Show</button>
+          </div>
+          <p id="errorBanner" class="banner hidden" role="alert"></p>
+        </div>
+
+        <div class="actions">
+          <button id="analyzeBtn" type="button" class="btn primary">
+            Analyze Password
+          </button>
+          <button id="clearBtn" type="button" class="btn danger">
+            Clear
+          </button>
+        </div>
+
+        <div class="realtime-hint">
+          <span class="lock-icon">🔒</span>
+          <span>Analysis runs locally (no password storage).</span>
+        </div>
+
+        <hr class="divider" />
+
+        <div class="score-row">
+          <div>
+            <div class="label">Overall Strength</div>
+            <div id="strengthLabel" class="strength-label">—</div>
+          </div>
+          <div class="pill" id="riskPill">
+            Risk: <span id="riskLevel">—</span>
+          </div>
+        </div>
+
+        <div class="progress">
+          <div id="progressBar" class="progress-bar" style="width: 0%"></div>
+        </div>
+
+        <div class="score-meta">
+          <div class="meta-item">
+            <div class="meta-label">Score (0–100)</div>
+            <div id="scoreValue" class="meta-value">0</div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-label">Entropy</div>
+            <div id="entropyValue" class="meta-value">0.00</div>
+            <div id="entropyLabel" class="meta-sub">Low Entropy</div>
+          </div>
+        </div>
+
+        <div id="feedbackBox" class="info-box hidden">
+          <div class="info-title" id="feedbackTitle">Info</div>
+          <div class="info-text" id="feedbackText"></div>
+        </div>
+      </section>
+
+      <!-- Right: Report -->
+      <section class="card">
+        <h2 class="card-title">Detailed Security Report</h2>
+
+        <div class="report-grid">
+          <div class="report-item">
+            <div class="report-title">Length Score</div>
+            <div id="lengthScore" class="report-value">—</div>
+          </div>
+          <div class="report-item">
+            <div class="report-title">Complexity Score</div>
+            <div id="complexityScore" class="report-value">—</div>
+          </div>
+          <div class="report-item">
+            <div class="report-title">Entropy Score</div>
+            <div id="entropyScore" class="report-value">—</div>
+          </div>
+          <div class="report-item">
+            <div class="report-title">Overall Security Score</div>
+            <div id="overallScore" class="report-value">—</div>
+          </div>
+        </div>
+
+        <hr class="divider" />
+
+        <h3 class="subheading">Pattern Detection</h3>
+        <ul id="patternList" class="bullets"></ul>
+
+        <hr class="divider" />
+
+        <h3 class="subheading">Security Checks</h3>
+        <ul id="securityList" class="bullets"></ul>
+
+        <hr class="divider" />
+
+        <h3 class="subheading">Attack Estimation</h3>
+        <div class="report-grid">
+          <div class="report-item">
+            <div class="report-title">Brute Force Attack</div>
+            <div id="bruteForce" class="report-value">—</div>
+          </div>
+          <div class="report-item">
+            <div class="report-title">Dictionary Attack</div>
+            <div id="dictionary" class="report-value">—</div>
+          </div>
+          <div class="report-item">
+            <div class="report-title">Credential Stuffing</div>
+            <div id="credentialStuffing" class="report-value">—</div>
+          </div>
+          <div class="report-item">
+            <div class="report-title">Risk Level</div>
+            <div id="riskPill2" class="report-value">—</div>
+          </div>
+        </div>
+
+        <hr class="divider" />
+
+        <h3 class="subheading">Detailed Improvement Suggestions</h3>
+        <ul id="recommendationsList" class="bullets"></ul>
+
+        <div class="education">
+          <h3>Educational Section</h3>
+          <ul class="bullets">
+            <li><b>What makes a strong password?</b> Longer length + unique characters + resistance to patterns.</li>
+            <li><b>What is entropy?</b> A rough measure of unpredictability (higher is harder to guess).</li>
+            <li><b>What is brute force?</b> Trying many guesses until the correct password is found.</li>
+            <li><b>Why password reuse is dangerous?</b> If one site is breached, attackers may try the same password elsewhere.</li>
+          </ul>
+        </div>
+
+        <div class="education">
+          <h3>Password Entropy Calculator (Local Estimate)</h3>
+          <p>
+            Entropy here is an approximation based on the character variety (lower/upper/digits/symbols) used.
+          </p>
+        </div>
+
+        <hr class="divider" />
+
+        <h3 class="subheading">Security Dashboard</h3>
+        <div class="report-grid">
+          <div class="report-item">
+            <div class="report-title">Total Analyses</div>
+            <div id="totalAnalyses" class="report-value">0</div>
+          </div>
+          <div class="report-item">
+            <div class="report-title">Average Strength Score</div>
+            <div id="avgStrength" class="report-value">0</div>
+          </div>
+          <div class="report-item">
+            <div class="report-title">Strong Password Percentage</div>
+            <div id="strongPct" class="report-value">0%</div>
+          </div>
+          <div class="report-item">
+            <div class="report-title">Weak Password Percentage</div>
+            <div id="weakPct" class="report-value">0%</div>
+          </div>
+        </div>
+
+        <hr class="divider" />
+
+        <h3 class="subheading">Generate Secure Password (Bonus)</h3>
+        <div class="generate">
+          <div class="controls-row">
+            <div class="choice">
+              <label for="genLength">Length</label>
+              <input id="genLength" type="number" min="8" max="64" value="16" />
+            </div>
+            <div class="choice">
+              <label>Options</label>
+              <div class="checks">
+                <label><input id="genSymbols" type="checkbox" checked /> Symbols</label>
+                <label><input id="genUpper" type="checkbox" checked /> Uppercase</label>
+                <label><input id="genLower" type="checkbox" checked /> Lowercase</label>
+                <label><input id="genDigits" type="checkbox" checked /> Numbers</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="choice">
+            <button id="genBtn" type="button" class="btn primary">Generate Password</button>
+            <div class="generator-output" style="margin-top:12px;">
+              <input id="genOutput" type="text" readonly value="" />
+              <button id="copyBtn" type="button" class="btn secondary">Copy</button>
+            </div>
+            <p style="color:var(--muted);font-size:13px;margin:10px 0 0;">
+              Generated password is not stored by the app.
+            </p>
+          </div>
+        </div>
+
+        <hr class="divider" />
+
+        <p style="color:var(--muted); font-size:12px; margin:0;">
+          Security requirement: never log or save actual passwords. Analysis is performed locally.
+        </p>
+      </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+  </div>
+</body>
+</html>
