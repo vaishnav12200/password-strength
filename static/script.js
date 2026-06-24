@@ -137,8 +137,64 @@ async function analyzeCurrent({ showError = true } = {}) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Password generator (bonus) - client-side only
+  function choose(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  function generatePassword() {
+    const length = Math.max(
+      8,
+      Math.min(64, parseInt($("genLength").value || "16", 10))
+    );
+
+    const includeSymbols = $("genSymbols").checked;
+    const includeUpper = $("genUpper").checked;
+    const includeLower = $("genLower").checked;
+    const includeDigits = $("genDigits").checked;
+
+    let pools = [];
+    if (includeLower) pools.push("abcdefghijklmnopqrstuvwxyz");
+    if (includeUpper) pools.push("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    if (includeDigits) pools.push("0123456789");
+    if (includeSymbols) pools.push("!@#$%^&*()_+-=[]{}|;:,.<>?");
+
+    if (pools.length === 0) return "";
+
+    // Ensure at least one from each enabled pool
+    let out = [];
+    for (const p of pools) out.push(choose(p.split("")));
+
+    const allChars = pools.join("");
+    while (out.length < length) out.push(choose(allChars.split("")));
+
+    // Shuffle
+    out = out.sort(() => Math.random() - 0.5);
+    return out.join("");
+  }
+
+  const genBtn = $("genBtn");
+  if (genBtn) {
+    genBtn.addEventListener("click", () => {
+      const pw = generatePassword();
+      $("genOutput").value = pw;
+    });
+  }
+
+  const copyBtn = $("copyBtn");
+  if (copyBtn) {
+    copyBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText($("genOutput").value || "");
+        copyBtn.textContent = "Copied";
+        setTimeout(() => (copyBtn.textContent = "Copy"), 1200);
+      } catch (e) {
+        // Clipboard might be blocked; fail silently.
+      }
+    });
+  }
+
   // Buttons
   $("analyzeBtn").addEventListener("click", () => analyzeCurrent());
+
   $("clearBtn").addEventListener("click", () => {
     $("passwordInput").value = "";
     setHidden("errorBanner", true);

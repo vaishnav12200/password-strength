@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.venv/
+venv/
+ENV/
+env/
+
+# Flask / runtime
+instance/
+*.db
+*.sqlite3
+
+# Env files
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Security: never commit local generated assets
+database/stats.db
+
