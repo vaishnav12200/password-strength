@@ -110,7 +110,20 @@ class PasswordStrengthAnalyzer:
         security_penalty = self._security_penalty(security_checks)
 
         raw_score = length_score + complexity_score - pattern_penalty - security_penalty
+
+        # Hard calibration for obviously weak/common patterns.
+        # These are common real-world passwords; ensure they consistently fall into the lowest buckets.
+        has_common = any(h.name == "Common Password" for h in security_checks)
+        if has_common:
+            raw_score -= 60
+
+        # Very strong repeated-sequence signals should also heavily reduce scores.
+        has_strong_repeats = any(h.name == "Repeated Characters" and h.severity in ("med", "high") for h in pattern_hits)
+        if has_strong_repeats:
+            raw_score -= 35
+
         strength_score = max(0, min(100, int(round(raw_score))))
+
 
         entropy_bits = self._estimate_entropy_bits(composition, password)
         entropy_label = self._entropy_label(entropy_bits)
